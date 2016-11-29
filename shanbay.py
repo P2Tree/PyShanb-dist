@@ -60,6 +60,7 @@ class Shanbay(object):
             # 返回登录成功后生成的 cookies
             return r_login.cookies.get_dict()
         else:
+            print("login.status_code: ", r_login.status_code)
             raise LoginException
 
     def get_word(self, api, word):

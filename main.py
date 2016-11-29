@@ -11,6 +11,7 @@ from urllib2 import quote
 import tempfile
 import os
 import time
+import subprocess
 
 import requests
 
@@ -73,12 +74,16 @@ def main():
 
     if settings.iciba:
         from iciba import Lciba as iciba_
-    if settings.auto_play and os.name == 'nt':
+    if settings.auto_play and os.name == 'nt':  # If operate system is Windows
         try:
             import mp3play
         except ImportError:
             settings.auto_play = False
+    elif settings.auto_play and os.name == 'posix': # If operate system is Linux
+        print("")
+        # I should check sox installed or not in system
     else:
+        output(color("Sorry, your system doesn't support audio player", 'red', effect='underline'))
         settings.auto_play = False
 
     cmd_width = 55
@@ -101,7 +106,7 @@ def main():
             continue
 
         # 输入 q 退出程序
-        if word == 'q':
+        if word == 'q' or word == 'Q':
             output('Goodbye.')
             sys.exit(0)
 
@@ -154,6 +159,7 @@ def main():
             iciba_syllable, iciba_audio, iciba_def, iciba_extra = iciba_info
 
             if any(iciba_info):
+                output("in iciba_info")
                 cmd_width_icb = 30
                 output('\n' + 'iciba.com- %s --begin'.center(
                     cmd_width_icb, '-') % color(word, colour,
@@ -172,7 +178,6 @@ def main():
                 output('iciba.com------end'.center(cmd_width_icb, '-'))
 
         try:
-            settings.auto_play = 1
             if settings.auto_play:
                 if iciba_audio:
                     referer = iciba.word_url
@@ -181,17 +186,18 @@ def main():
                 # 临时保存音频文件
                 file_name = str(time.time()) + \
                     os.path.splitext(audio_url)[1] or '.mp3'
-                #  temp_file = os.path.realpath(tempfile.gettempdir() + file_name)
-                temp_file = os.path.realpath("/home/pwe/" + file_name)
-                print("write audio, temp_file: ", temp_file)
+                temp_file = os.path.realpath(tempfile.gettempdir() + '/' + file_name)
                 audio = download_audio(audio_url, headers, referer=referer)
                 with open(temp_file, 'wb') as f:
                     f.write(audio)
                 # 播放单词读音
-                mp3 = mp3play.load(temp_file)
-                mp3.play()
-               # 移除临时文件
-                #  os.remove(temp_file)
+                if os.name == 'nt':
+                    mp3 = mp3play.load(temp_file)
+                    mp3.play()
+                elif os.name == 'posix':
+                    os.system('play ' + temp_file + ' 2>/dev/null')
+                # 移除临时文件
+                os.remove(temp_file)
         except:
             pass
 
