@@ -78,6 +78,13 @@ def main():
             import mp3play
         except ImportError:
             settings.auto_play = False
+    elif settings.auto_play and os.name == 'posix':
+        try:
+            #  import subprocess
+            import commands
+        except ImportError:
+            output(color('Warning', 'yellow', effect='underline') + ": import commands fault")
+            settings.auto_play = False
     else:
         settings.auto_play = False
 
@@ -180,13 +187,20 @@ def main():
                 # 临时保存音频文件
                 file_name = str(time.time()) + \
                     os.path.splitext(audio_url)[1] or '.mp3'
-                temp_file = os.path.realpath(tempfile.gettempdir() + file_name)
+                temp_file = os.path.realpath(tempfile.gettempdir() +'/' + file_name)
                 audio = download_audio(audio_url, headers, referer=referer)
                 with open(temp_file, 'wb') as f:
                     f.write(audio)
                 # 播放单词读音
-                mp3 = mp3play.load(temp_file)
-                mp3.play()
+                if os.name == 'nt':
+                    mp3 = mp3play.load(temp_file)
+                    mp3.play()
+                elif os.name == 'posix':
+                    print("can play")
+                    print("temp_file: ", temp_file)
+                    #  subprocess.call("play " + temp_file)
+                    #  os.system('play ' + temp_file + '&>/dev/null')
+                    commands.getstatusoutput('play ' + temp_file + '&>/dev/null')
                # 移除临时文件
                 os.remove(temp_file)
         except:
