@@ -80,7 +80,6 @@ def main():
             settings.auto_play = False
     elif settings.auto_play and os.name == 'posix':
         try:
-            #  import subprocess
             import commands
         except ImportError:
             output(color('Warning', 'yellow', effect='underline') + ": import commands fault")
@@ -196,12 +195,8 @@ def main():
                     mp3 = mp3play.load(temp_file)
                     mp3.play()
                 elif os.name == 'posix':
-                    print("can play")
-                    print("temp_file: ", temp_file)
-                    #  subprocess.call("play " + temp_file)
-                    #  os.system('play ' + temp_file + '&>/dev/null')
                     commands.getstatusoutput('play ' + temp_file + '&>/dev/null')
-               # 移除临时文件
+                # 移除临时文件
                 os.remove(temp_file)
         except:
             pass
