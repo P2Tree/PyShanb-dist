@@ -195,7 +195,10 @@ def main():
                     mp3 = mp3play.load(temp_file)
                     mp3.play()
                 elif os.name == 'posix':
-                    commands.getstatusoutput('play ' + temp_file + '&>/dev/null')
+                    #  commands.getstatusoutput('play ' + temp_file + '&>/dev/null')
+                    (command_status, command_result) = commands.getstatusoutput('play ' + temp_file)
+                    if command_status != 0:
+                        print("Play audio fault: ", command_result)
                 # 移除临时文件
                 os.remove(temp_file)
         except:
